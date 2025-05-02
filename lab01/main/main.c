@@ -182,10 +182,10 @@ void app_main(void)
 		lcd_fillScreen(BACKGROUND_CLR);
 		lcd_drawString(0, 0, "Exercise 4", TITLE_CLR);
 		drawCar(x, OBJ_Y);
-		lcd_fillRect(0, LCD_H - FONT_H, FONT_W * STR_BUF_LEN, LCD_H, BACKGROUND_CLR);
 		sprintf(str, "%3ld", x);
 		lcd_drawString(0, LCD_H - FONT_H, str, STATUS_CLR);
 		lcd_writeFrame();
+		DELAY_MS(DELAY_EX3);
 	}
 
 	// Exercise 5 - Draw an animated Pac-Man moving across the display.
@@ -204,10 +204,10 @@ void app_main(void)
 			lcd_fillScreen(BACKGROUND_CLR);
 			lcd_drawString(0, 0, "Exercise 5", TITLE_CLR);
 			lcd_drawBitmap(x, OBJ_Y, pac[pidx[i++ % sizeof(pidx)]], PAC_W, PAC_H, YELLOW);
-			lcd_fillRect(0, LCD_H - FONT_H, FONT_W * STR_BUF_LEN, LCD_H, BACKGROUND_CLR);
 			sprintf(str, "%3ld", x);
 			lcd_drawString(0, LCD_H - FONT_H, str, STATUS_CLR);
 			lcd_writeFrame();
+			DELAY_MS(DELAY_EX3);
 		}
 	}
 }
