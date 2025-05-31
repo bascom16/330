@@ -44,7 +44,7 @@ static const char *TAG = "lab04";
 // If not Milestone 2, allow tone code to compile (do nothing)
 typedef enum {SINE_T, SQUARE_T, TRIANGLE_T, SAW_T, LAST_T} tone_t;
 #define MAX_VOL 100U
-#define tone_init(hz)
+#define tone_init(hz) 0
 #define tone_stop()
 #define tone_set_volume(vol)
 #define tone_start(tone,freq)
@@ -70,6 +70,14 @@ typedef enum {SINE_T, SQUARE_T, TRIANGLE_T, SAW_T, LAST_T} tone_t;
 #define WAVE_MARK_H 15
 #define WAVE_MARK_CL rgb565(96, 96, 96)
 // #define WAVE_MARK_CL WHITE
+
+#define CHK_RET(x) ({                                           \
+        int32_t ret_val = (x);                                  \
+        if (ret_val != 0) {                                     \
+            ESP_LOGE(TAG, "FAIL: return %ld, %s", ret_val, #x); \
+        }                                                       \
+        ret_val;                                                \
+    })
 
 TimerHandle_t update_timer;
 coord_t dcx, dcy;
@@ -208,11 +216,11 @@ void app_main(void)
 
 	vol = VOLUME_DEFAULT;
 	tone = SINE_T;
-	tone_init(SAMPLE_RATE); // Initialize tone and sample rate
+	CHK_RET(tone_init(SAMPLE_RATE)); // Initialize tone and sample rate
 	tone_set_volume(vol); // Set the volume
 	draw_tone_status();
 
-	joy_init(); // Initialize joystick driver
+	CHK_RET(joy_init()); // Initialize joystick driver
 	draw_joystick_status();
 
 	// Schedule the tick() function to run at the specified period.
