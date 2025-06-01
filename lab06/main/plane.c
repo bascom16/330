@@ -1,24 +1,21 @@
 #include "plane.h"
-
+#include "missile.h"
 #include "lcd.h"
+#include "config.h"
 
 #define X_START (LCD_H / 4)
 #define Y_START LCD_W
 
-#define FRAMES_OFFSCREEN 16
 #define LEFT_BOUNDARY 0 // idk how it's measured
-
-#define LENGTH 6
-#define HEIGHT 4
 
 static int16_t x_pos;
 static int16_t y_pos;
 
+static missile_t *missile;
+
 static bool explode_flag;
 
 static uint8_t frame_counter;
-
-void shoot();
 
 // define missile SM states
 enum plane_state_t {
@@ -34,11 +31,12 @@ static enum plane_state_t plane_state;
 // Initialize the plane state machine. Pass a pointer to the missile
 // that will be (re)launched by the plane. It will only have one missile.
 void plane_init(missile_t *plane_missile) {
+    missile = plane_missile;
     plane_state = INIT_ST;
     x_pos = X_START;
     y_pos = Y_START;
     explode_flag = false;
-    frame_counter = FRAMES_OFFSCREEN;
+    frame_counter = CONFIG_PLANE_IDLE_TIME_TICKS;
 }
 
 /******************** Plane Control & Tick Functions ********************/
@@ -56,7 +54,7 @@ void plane_tick(void) {
             plane_state = IDLE_ST;
             break;
         case IDLE_ST:
-            if (frame_counter >= FRAMES_OFFSCREEN) { // fly if time elapsed
+            if (frame_counter >= CONFIG_PLANE_IDLE_TIME_TICKS) { // fly if time elapsed
                 plane_state = FLY_ST;
             } else { // stay idle
                 plane_state = IDLE_ST;
@@ -85,13 +83,16 @@ void plane_tick(void) {
         case FLY_ST:
             x_pos++;
             lcd_drawTriangle(   x_pos, y_pos, 
-                                x_pos + LENGTH, y_pos + (HEIGHT/2), 
-                                x_pos + LENGTH, y_pos - (HEIGHT/2), 
-                                WHITE);
-            shoot();
+                                x_pos + CONFIG_PLANE_WIDTH, y_pos + (CONFIG_PLANE_HEIGHT / 2), 
+                                x_pos + CONFIG_PLANE_WIDTH, y_pos - (CONFIG_PLANE_HEIGHT / 2), 
+                                CONFIG_COLOR_PLANE);
+            if (x_pos == LCD_W / 2) {
+                // plane is halfway across the screen, shoot
+                missile_launch_plane(missile, x_pos, y_pos);
+            }
             break;
         default:
-            //someting wrong 
+            //someting wong 
     }
 }
 
@@ -106,13 +107,4 @@ void plane_get_pos(coord_t *x, coord_t *y) {
 // Return whether the plane is flying.
 bool plane_is_flying(void) {
     return plane_state == FLY_ST;
-}
-
-// missile control
-void shoot() {
-    // 1 check if missile exists
-    //      if so do nothing
-    //      if not, 2 check if time has elapsed
-    //          if so, 3 shoot
-    //          otherwise 4 count up
 }
